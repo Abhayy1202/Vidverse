@@ -1,11 +1,12 @@
 // require("dotenv").config({path:'./env'}); // Normal Tareeka
 import dotenv from "dotenv";
 import connectDB from "./db/index.js";
+import { app } from "./app.js";
 
 dotenv.config({ path: "./env" });
 connectDB()
   .then(() => {
-    app.on("errror",(error)=>{
+    app.on("error",(error)=>{
       console.log("Errr:",error);
       throw error
     })

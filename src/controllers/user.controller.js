@@ -4,6 +4,7 @@ import { User } from "../models/user.model.js";
 import { uploadCloudinary } from "../utils/cloudinary.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import jwt from "jsonwebtoken";
+import mongoose from "mongoose";
 
 const generateAccessandRefreshToken = async (userId) => {
   try {
@@ -343,6 +344,7 @@ const getUserChannelProfile = asyncHandler(async (req, res) => {
     },
     {
       $lookup: {
+        //get Doc that contain subscribers
         from: "subscriptions",
         localField: "_id",
         foreignField: "channel",
@@ -351,6 +353,7 @@ const getUserChannelProfile = asyncHandler(async (req, res) => {
     },
     {
       $lookup: {
+        // get Doc that conatain channel I subscribed to
         from: "subscriptions",
         localField: "_id",
         foreignField: "subscriber",
@@ -383,20 +386,82 @@ const getUserChannelProfile = asyncHandler(async (req, res) => {
         subscribersCount: 1,
         channelSubscribedCount: 1,
         isSubscribed: 1,
-        avatar:1,
-        coverImage:1
+        avatar: 1,
+        coverImage: 1,
       },
     },
   ]);
   if (!channel?.length) {
-    throw new ApiError(404,"Channel Not Found")
+    throw new ApiError(404, "Channel Not Found");
   }
 
   return res
-  .status(200)
+    .status(200)
+    .json(
+      new ApiResponse(200, channel[0], "User Channel fetched successfully")
+    );
+});
+
+/**Point to remember
+ * aggregation ka code as it is database pe jata hai
+ * baki me mongoose behind the scene sb smbhal leta hai
+ * but that's not the case with aggregation
+ */
+const getWatchHistory = asyncHandler(async (req, res) => {
+  const user = await User.aggregate([
+    {
+      $match: {
+        _id: new mongoose.Types.ObjectId(req.user._id),
+      },
+
+      $lookup: {
+        from: "videos",
+        localField: "watchHistory",
+        foreignField: "_id",
+        as: "WatchHistory",
+
+        pipeline: [
+          //used to add subpipelines
+          {
+            $lookup: {
+              from: "users",
+              localField: "owner",
+              foreignField: "_id",
+              as: "Owner",
+
+              pipeline: [
+                {
+                  $project: {
+                    fullName: 1,
+                    username: 1,
+                    avatar: 1,
+                  },
+                },
+              ],
+            },
+          }, //yha tk me owner m array of objects hai
+          //to frontEnd me data kafi jayega aur user owner[0] krke data
+          //retrieve krna hoga to ease that we can add another pipeline
+          {
+            $set: {
+              owner: {
+                //existing owner field overwrite hogai
+                $first: "$owner",
+              },
+            },
+          },
+        ],
+      },
+    },
+  ]);
+
+  return res.status(200)
   .json(
-    new ApiResponse(200,channel[0],"User Channel fetched successfully")
-  )
+    new ApiResponse(
+      200,
+      user[0].watchHistory,
+      "watch History fetched successfully"
+    ));
 });
 
 export {
@@ -410,4 +475,5 @@ export {
   updateUserAvatar,
   updateUserCoverImage,
   getUserChannelProfile,
+  getWatchHistory,
 };

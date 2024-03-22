@@ -23,4 +23,16 @@ const uploadCloudinary = async (localFilePath) => {
   }
 };
 
+const removeCloudinary=(async (Image_Id)=>{
+
+ try {
+   const response = await cloudinary.uploader.destroy(Image_Id,{resource_type:"auto"})
+   return response
+ } catch (error) {
+  return null;
+ }
+})
+
+
+
 export { uploadCloudinary };

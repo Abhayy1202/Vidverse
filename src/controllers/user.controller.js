@@ -22,18 +22,16 @@ const generateAccessandRefreshToken = async (userId) => {
     throw new ApiError(500, "Some Problem encountered while generating Tokens");
   }
 };
- 
-//function to get user's old info
-const getval = async (req)=>{
-try {
-  const user = await User.findById(req.user?._id)
-  return user;
-} 
-catch (error) {
-  return error;
-}
 
-}
+//function to get user's old info
+const getval = async (req) => {
+  try {
+    const user = await User.findById(req.user?._id);
+    return user;
+  } catch (error) {
+    return error;
+  }
+};
 const registerUser = asyncHandler(async (req, res) => {
   // get user details from frontend
   const { fullName, Email, username, password } = req.body;
@@ -302,12 +300,12 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
 
   //getting user's old avatar info
   const old_detail = await getval(req);
-  const old_avatar="";
+  const old_avatar = "";
   if (!(old_detail instanceof Error)) {
-    old_avatar=old_detail.avatar;
+    old_avatar = old_detail.avatar;
     remover(old_avatar);
   }
-  
+
   const user = await User.findByIdAndUpdate(
     req.user?._id,
     {
@@ -321,8 +319,8 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
   return res
     .status(200)
     .json(new ApiResponse(200, user, "Avatar uploaded successfully"));
-  });
-  
+});
+
 //Assignment to delete old avatar files from cloudinary
 const updateUserCoverImage = asyncHandler(async (req, res) => {
   const newCoverImageLocalPath = req.file?.path;
@@ -335,15 +333,13 @@ const updateUserCoverImage = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Error While uploading on CoverImage");
   }
 
-
   //getting user's old coverImage info
   const old_detail = await getval(req);
-  const old_coverImage="";
+  const old_coverImage = "";
   if (!(old_detail instanceof Error)) {
-    old_coverImage=old_detail.coverImage;
-    remover(old_coverImage)
+    old_coverImage = old_detail.coverImage;
+    remover(old_coverImage);
   }
-
 
   const user = await User.findByIdAndUpdate(
     req.user?._id,
@@ -355,17 +351,16 @@ const updateUserCoverImage = asyncHandler(async (req, res) => {
     { new: true }
   ).select("-password");
 
-
   return res
     .status(200)
     .json(new ApiResponse(200, user, "CoverImage uploaded successfully"));
 });
 
 //remove files from cloudinary
-const remover = async(image_url)=>{
-  const parts = image_url.split('/')
-  const publicId = parts[parts.length-1].split('/').[0];
-    await cloudinary.uploader.destroy(publicId, (error, result) => {
+const remover = async (image_url) => {
+  const parts = image_url.split("/");
+  const publicId = parts[parts.length - 1].split("/")[0];
+  await cloudinary.uploader.destroy(publicId, (error, result) => {
     if (error) {
       console.error(error);
       // Handle error
@@ -373,8 +368,8 @@ const remover = async(image_url)=>{
       console.log(result);
       // Image deleted successfully
     }
-})
-}
+  });
+};
 
 const getUserChannelProfile = asyncHandler(async (req, res) => {
   const { username } = req.params;
@@ -502,13 +497,15 @@ const getWatchHistory = asyncHandler(async (req, res) => {
     },
   ]);
 
-  return res.status(200)
-  .json(
-    new ApiResponse(
-      200,
-      user[0].watchHistory,
-      "watch History fetched successfully"
-    ));
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(
+        200,
+        user[0].watchHistory,
+        "watch History fetched successfully"
+      )
+    );
 });
 
 export {

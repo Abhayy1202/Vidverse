@@ -1,7 +1,7 @@
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { User } from "../models/user.model.js";
-import { uploadCloudinary } from "../utils/cloudinary.js";
+import { removeCloudinary, uploadCloudinary } from "../utils/cloudinary.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import jwt from "jsonwebtoken";
 import mongoose from "mongoose";
@@ -300,10 +300,11 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
 
   //getting user's old avatar info
   const old_detail = await getval(req);
-  const old_avatar = "";
+  let old_avatar = "";
   if (!(old_detail instanceof Error)) {
     old_avatar = old_detail.avatar;
-    remover(old_avatar);
+    console.log(old_avatar)
+    removeCloudinary(old_avatar);
   }
 
   const user = await User.findByIdAndUpdate(
@@ -338,7 +339,7 @@ const updateUserCoverImage = asyncHandler(async (req, res) => {
   const old_coverImage = "";
   if (!(old_detail instanceof Error)) {
     old_coverImage = old_detail.coverImage;
-    remover(old_coverImage);
+    removeCloudinary(old_coverImage);
   }
 
   const user = await User.findByIdAndUpdate(
@@ -356,20 +357,7 @@ const updateUserCoverImage = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, user, "CoverImage uploaded successfully"));
 });
 
-//remove files from cloudinary
-const remover = async (image_url) => {
-  const parts = image_url.split("/");
-  const publicId = parts[parts.length - 1].split("/")[0];
-  await cloudinary.uploader.destroy(publicId, (error, result) => {
-    if (error) {
-      console.error(error);
-      // Handle error
-    } else {
-      console.log(result);
-      // Image deleted successfully
-    }
-  });
-};
+
 
 const getUserChannelProfile = asyncHandler(async (req, res) => {
   const { username } = req.params;

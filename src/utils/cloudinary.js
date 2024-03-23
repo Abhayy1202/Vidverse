@@ -23,16 +23,22 @@ const uploadCloudinary = async (localFilePath) => {
   }
 };
 
-const removeCloudinary=(async (Image_Id)=>{
+//remove files from cloudinary
+const removeCloudinary = async (image_url) => {
+  const parts = image_url.split("/");
+  const publicId = parts[parts.length - 1].split(".")[0];
+  console.log(publicId)
+  await cloudinary.uploader.destroy(publicId, (error, result) => {
+    if (error) {
+      console.error(error);
+      // Handle error
+    } else {
+      console.log(result);
+      // Image deleted successfully
+    }
+  });
+};
 
- try {
-   const response = await cloudinary.uploader.destroy(Image_Id,{resource_type:"auto"})
-   return response
- } catch (error) {
-  return null;
- }
-})
 
 
-
-export { uploadCloudinary };
+export { uploadCloudinary, removeCloudinary };

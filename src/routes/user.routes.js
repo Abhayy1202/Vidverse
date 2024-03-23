@@ -41,7 +41,7 @@ router.route("/current-user").post(verifyJWT, getCurrentUser);
 router.route("/update-account").patch(verifyJWT,updateAccountDetails)
 router.route("/avatar-Update").patch(verifyJWT,upload.single("avatar"),updateUserAvatar)
 router.route("/cover-Update").patch(verifyJWT,upload.single("coverImage"),updateUserCoverImage)
-router.route("/history".get(verifyJWT,getWatchHistory))
+router.route("/history").get(verifyJWT,getWatchHistory)
 
 //req.params se utha rahe hai data so ye colon ke baad wala item hi params me rhta hai 
 router.route("/channel/:username").get(verifyJWT,getUserChannelProfile)

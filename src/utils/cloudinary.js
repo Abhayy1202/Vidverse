@@ -30,7 +30,7 @@ const removeCloudinary = async (image_url) => {
   console.log(publicId)
   await cloudinary.uploader.destroy(publicId, (error, result) => {
     if (error) {
-      console.error(error);
+      console.log(error);
       // Handle error
     } else {
       console.log(result);
